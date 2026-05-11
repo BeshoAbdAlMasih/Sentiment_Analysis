@@ -20,28 +20,6 @@ Sentix takes raw tweet text and returns:
 - **Extracted entities** — key terms detected in the input
 
 ---
-
-## Demo
-
-```bash
-curl -X POST http://localhost:8000/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Just got promoted at work, best day ever!"}'
-```
-
-```json
-{
-  "dominant_sentiment": "Positive",
-  "confidence": 0.891,
-  "distribution": {
-    "positive": 89,
-    "negative": 11
-  }
-}
-```
-
----
-
 ## Project Structure
 
 ```
