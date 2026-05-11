@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Model files (large binaries — store with DVC or Git LFS if needed)
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.bin
+
+# Dataset files
+*.csv
+*.tsv
+*.parquet
+
+# Kaggle cache
+~/.cache/kagglehub/
+.kaggle/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Build / dist
+dist/
+build/
+*.egg-info/
+
+# uvicorn / fastapi
+*.pid

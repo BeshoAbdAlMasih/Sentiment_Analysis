@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sentix API Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "surface-container-high": "#282a32",
+          "secondary": "#c8c5cb",
+          "on-tertiary": "#303032",
+          "on-primary": "#002a78",
+          "on-primary-container": "#eeefff",
+          "primary-fixed": "#dbe1ff",
+          "error": "#ffb4ab",
+          "outline": "#8d90a0",
+          "surface": "#11131b",
+          "on-secondary-fixed-variant": "#47464b",
+          "surface-bright": "#373942",
+          "surface-variant": "#32343d",
+          "surface-tint": "#b4c5ff",
+          "surface-container": "#1d1f27",
+          "on-tertiary-fixed-variant": "#474649",
+          "tertiary-fixed-dim": "#c8c6c8",
+          "on-secondary-container": "#b6b4b9",
+          "primary-container": "#2563eb",
+          "secondary-container": "#47464b",
+          "surface-container-lowest": "#0c0e16",
+          "background": "#11131b",
+          "on-error": "#690005",
+          "inverse-primary": "#0053db",
+          "tertiary-container": "#6e6d6f",
+          "surface-dim": "#11131b",
+          "secondary-fixed-dim": "#c8c5cb",
+          "surface-container-highest": "#32343d",
+          "inverse-surface": "#e1e2ed",
+          "error-container": "#93000a",
+          "on-tertiary-fixed": "#1b1b1d",
+          "inverse-on-surface": "#2e3039",
+          "on-primary-fixed": "#00174b",
+          "surface-container-low": "#191b23",
+          "on-error-container": "#ffdad6",
+          "on-tertiary-container": "#f3f0f3",
+          "on-secondary-fixed": "#1b1b1f",
+          "on-background": "#e1e2ed",
+          "tertiary": "#c8c6c8",
+          "on-secondary": "#303034",
+          "outline-variant": "#434655",
+          "on-surface-variant": "#c3c6d7",
+          "on-surface": "#e1e2ed",
+          "tertiary-fixed": "#e5e1e4",
+          "primary": "#b4c5ff",
+          "on-primary-fixed-variant": "#003ea8",
+          "primary-fixed-dim": "#b4c5ff",
+          "secondary-fixed": "#e4e1e7"
+        },
+        borderRadius: {
+          "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"
+        },
+        spacing: {
+          "stack-sm": "8px", "stack-md": "16px", "margin-mobile": "16px",
+          "container-max": "1280px", "margin-desktop": "40px",
+          "stack-lg": "32px", "stack-xl": "64px", "unit": "8px",
+          "stack-xs": "4px", "gutter": "24px"
+        },
+        fontFamily: {
+          "h2": ["Hanken Grotesk"], "body-lg": ["Inter"], "code-sm": ["JetBrains Mono"],
+          "body-sm": ["Inter"], "body-md": ["Inter"], "label-caps": ["Inter"],
+          "code-md": ["JetBrains Mono"], "h1": ["Hanken Grotesk"], "h3": ["Hanken Grotesk"]
+        },
+        fontSize: {
+          "h2":  ["32px", { lineHeight:"1.2", letterSpacing:"-0.02em", fontWeight:"700" }],
+          "body-lg": ["18px", { lineHeight:"1.6", fontWeight:"400" }],
+          "code-sm": ["12px", { lineHeight:"1.6", fontWeight:"400" }],
+          "body-sm": ["14px", { lineHeight:"1.5", fontWeight:"400" }],
+          "body-md": ["16px", { lineHeight:"1.5", fontWeight:"400" }],
+          "label-caps": ["12px", { lineHeight:"1", letterSpacing:"0.05em", fontWeight:"600" }],
+          "code-md": ["14px", { lineHeight:"1.6", fontWeight:"400" }],
+          "h1":  ["40px", { lineHeight:"1.2", letterSpacing:"-0.02em", fontWeight:"700" }],
+          "h3":  ["24px", { lineHeight:"1.3", fontWeight:"600" }]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #0f0f11; }
+  .glass-panel {
+    background: linear-gradient(180deg, #1a1a1e 0%, #131316 100%);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .glass-glow:hover {
+    background: radial-gradient(circle at top left, rgba(37,99,235,0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #1a1a1e 0%, #131316 100%);
+  }
+  /* Loading spinner */
+  .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading .spinner { display: block; }
+  .loading .btn-icon { display: none; }
+
+  /* fade-in for results */
+  .fade-in { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* sentiment color states */
+  .sentiment-positive { color: #b4c5ff; }
+  .sentiment-negative { color: #ffb4ab; }
+  .sentiment-neutral  { color: #c8c5cb; }
+</style>
+</head>
+
+<body class="text-on-surface font-body-md min-h-screen flex flex-col">
+
+<!-- ── Nav ─────────────────────────────────────────────────────────────── -->
+<nav class="bg-surface-container/80 backdrop-blur-xl sticky top-0 z-50 border-b border-outline-variant/10">
+  <div class="flex justify-between items-center max-w-container-max mx-auto px-margin-desktop h-16">
+    <div class="flex items-center gap-stack-lg">
+      <span class="text-h3 font-h2 tracking-tight text-on-surface">Sentix API</span>
+      <div class="hidden md:flex gap-stack-md font-body-sm text-body-sm">
+        <a class="text-primary border-b-2 border-primary pb-4 -mb-4 transition-colors" href="#">Dashboard</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">API Reference</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Models</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Usage</a>
+      </div>
+    </div>
+    <button class="bg-primary-container text-on-primary-container px-4 py-2 rounded font-body-sm text-body-sm hover:opacity-90 transition-opacity">
+      Get API Key
+    </button>
+  </div>
+</nav>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<main class="flex-grow max-w-container-max mx-auto px-margin-desktop py-stack-xl w-full">
+
+  <!-- Hero -->
+  <div class="mb-stack-xl">
+    <h1 class="font-h1 text-h1 text-on-surface mb-stack-sm">Sentiment Analysis Console</h1>
+    <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+      Analyze emotional tone from text using a LinearSVC model trained on 10,000 tweets.
+    </p>
+  </div>
+
+  <!-- 2-col grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+
+    <!-- LEFT: Input -->
+    <div class="lg:col-span-7 glass-panel rounded-lg p-stack-md flex flex-col gap-stack-md">
+      <label class="font-label-caps text-label-caps text-secondary uppercase tracking-wider">
+        Input Payload
+      </label>
+
+      <textarea
+        id="analysis-input"
+        class="w-full h-[400px] bg-[#09090b] text-on-surface font-code-md text-code-md rounded border border-outline-variant/20 focus:border-primary-container focus:ring-1 focus:ring-primary-container p-4 resize-none outline-none transition-colors"
+        placeholder="Type or paste tweet text here..."></textarea>
+
+      <!-- char counter + lang -->
+      <div class="flex justify-between items-center text-secondary font-code-sm text-code-sm">
+        <span>Language: Auto-detect</span>
+        <span id="char-counter">0 / 5000 chars</span>
+      </div>
+
+      <!-- error message -->
+      <p id="error-msg" class="text-error font-code-sm text-code-sm hidden"></p>
+
+      <!-- Buttons -->
+      <div class="flex gap-stack-sm mt-stack-sm">
+        <button
+          id="analyze-btn"
+          class="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-3 rounded-lg font-body-md text-body-md hover:bg-inverse-primary transition-colors">
+          <span class="material-symbols-outlined btn-icon" style="font-variation-settings:'FILL' 1;">analytics</span>
+          <div class="spinner"></div>
+          Analyze Sentiment
+        </button>
+        <button
+          id="clear-btn"
+          class="px-6 py-3 rounded-lg font-body-md text-body-md border border-outline-variant/30 text-on-surface hover:bg-surface-container transition-colors">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="lg:col-span-5 flex flex-col gap-stack-md">
+      <h3 class="font-h3 text-h3 text-on-surface">Analysis Results</h3>
+
+      <!-- Card 1: Sentiment + score + bar -->
+      <div id="result-card" class="glass-panel glass-glow rounded-lg p-stack-md fade-in">
+        <div class="flex justify-between items-start mb-stack-md">
+          <div>
+            <span class="font-label-caps text-label-caps text-secondary uppercase tracking-wider block mb-stack-xs">
+              Dominant Sentiment
+            </span>
+            <span id="dominant-label" class="font-h2 text-h2 text-primary-container">—</span>
+          </div>
+          <div class="text-right">
+            <span class="font-label-caps text-label-caps text-secondary uppercase tracking-wider block mb-stack-xs">
+              Confidence Score
+            </span>
+            <span id="confidence-score" class="inline-block bg-surface-container px-2 py-1 rounded font-code-md text-code-md text-primary">
+              —
+            </span>
+          </div>
+        </div>
+
+        <!-- Bar -->
+        <div class="w-full h-3 flex rounded-full overflow-hidden bg-surface-container">
+          <div id="bar-pos" class="h-full bg-primary-container transition-all duration-500" style="width:0%"></div>
+          <div id="bar-neu" class="h-full bg-surface-variant transition-all duration-500"  style="width:0%"></div>
+          <div id="bar-neg" class="h-full bg-error transition-all duration-500"            style="width:0%"></div>
+        </div>
+        <div class="flex justify-between mt-2 font-code-sm text-code-sm text-secondary">
+          <span id="lbl-pos">— POS</span>
+          <span id="lbl-neu">— NEU</span>
+          <span id="lbl-neg">— NEG</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Entities -->
+      <div class="glass-panel glass-glow rounded-lg p-stack-md">
+        <span class="font-label-caps text-label-caps text-secondary uppercase tracking-wider block mb-stack-md">
+          Extracted Entities &amp; Polarity
+        </span>
+        <div id="entities-container" class="flex flex-wrap gap-stack-sm">
+          <span class="font-code-sm text-code-sm text-secondary">Run analysis to see entities.</span>
+        </div>
+      </div>
+
+      <!-- Model info badge -->
+      <div class="flex items-center gap-2 font-code-sm text-code-sm text-secondary">
+        <span class="material-symbols-outlined" style="font-size:14px;">info</span>
+        Model: LinearSVC · TF-IDF · Trained on 10k tweets
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer class="bg-surface-container-lowest py-stack-xl mt-auto border-t border-outline-variant/10">
+  <div class="flex flex-col md:flex-row justify-between items-center max-w-container-max mx-auto px-margin-desktop gap-gutter w-full">
+    <div class="text-secondary font-body-sm text-body-sm">
+      © 2024 Sentix API. Designed for high-performance development.
+    </div>
+    <div class="flex gap-stack-md font-label-caps text-label-caps">
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">API Docs</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">GitHub</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Status</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Changelog</a>
+      <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── JS ──────────────────────────────────────────────────────────────── -->
+<script>
+  const API_URL = 'http://127.0.0.1:8000/analyze';
+
+  const textarea     = document.getElementById('analysis-input');
+  const analyzeBtn   = document.getElementById('analyze-btn');
+  const clearBtn     = document.getElementById('clear-btn');
+  const charCounter  = document.getElementById('char-counter');
+  const errorMsg     = document.getElementById('error-msg');
+
+  const dominantLabel   = document.getElementById('dominant-label');
+  const confidenceScore = document.getElementById('confidence-score');
+  const barPos          = document.getElementById('bar-pos');
+  const barNeu          = document.getElementById('bar-neu');
+  const barNeg          = document.getElementById('bar-neg');
+  const lblPos          = document.getElementById('lbl-pos');
+  const lblNeu          = document.getElementById('lbl-neu');
+  const lblNeg          = document.getElementById('lbl-neg');
+  const entitiesContainer = document.getElementById('entities-container');
+
+  // ── char counter ──────────────────────────────────────────────────────
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCounter.textContent = `${len} / 5000 chars`;
+    if (len > 5000) textarea.value = textarea.value.slice(0, 5000);
+  });
+
+  // ── clear ─────────────────────────────────────────────────────────────
+  clearBtn.addEventListener('click', () => {
+    textarea.value = '';
+    charCounter.textContent = '0 / 5000 chars';
+    hideError();
+    resetResults();
+  });
+
+  // ── Ctrl+Enter shortcut ───────────────────────────────────────────────
+  textarea.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') analyzeBtn.click();
+  });
+
+  // ── analyze ───────────────────────────────────────────────────────────
+  analyzeBtn.addEventListener('click', async () => {
+    const text = textarea.value.trim();
+
+    if (!text) {
+      showError('Please enter some text before analyzing.');
+      return;
+    }
+    if (text.length < 3) {
+      showError('Text is too short. Please enter at least 3 characters.');
+      return;
+    }
+
+    hideError();
+    setLoading(true);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+      const data = await res.json();
+      renderResults(data);
+
+    } catch (err) {
+      showError('Could not reach the API. Make sure uvicorn is running on port 8000.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // ── render results ────────────────────────────────────────────────────
+  function renderResults(data) {
+    const { dominant_sentiment, confidence, distribution } = data;
+
+    // sentiment label + color
+    dominantLabel.textContent = dominant_sentiment;
+    dominantLabel.className = 'font-h2 text-h2';
+    if (dominant_sentiment === 'Positive') dominantLabel.classList.add('sentiment-positive');
+    else if (dominant_sentiment === 'Negative') dominantLabel.classList.add('sentiment-negative');
+    else dominantLabel.classList.add('sentiment-neutral');
+
+    // confidence
+    confidenceScore.textContent = confidence.toFixed(3);
+
+    // bars
+    barPos.style.width = distribution.positive + '%';
+    barNeu.style.width = distribution.neutral  + '%';
+    barNeg.style.width = distribution.negative + '%';
+
+    lblPos.textContent = distribution.positive + '% POS';
+    lblNeu.textContent = distribution.neutral  + '% NEU';
+    lblNeg.textContent = distribution.negative + '% NEG';
+
+    // entities
+    renderEntities(data.text || textarea.value.trim(), dominant_sentiment);
+
+    // fade-in animation
+    const card = document.getElementById('result-card');
+    card.classList.remove('fade-in');
+    void card.offsetWidth; // reflow
+    card.classList.add('fade-in');
+  }
+
+  function renderEntities(text, sentiment) {
+    // extract capitalised words and meaningful keywords
+    const words = text.match(/\b[A-Za-z]{4,}\b/g) || [];
+    const stopwords = new Set(['this','that','with','have','from','they','will',
+      'been','were','your','what','when','which','their','there','about','would',
+      'could','should','very','just','also','than','then','like','more','some']);
+
+    const unique = [...new Set(
+      words.filter(w => !stopwords.has(w.toLowerCase())).slice(0, 6)
+    )];
+
+    if (unique.length === 0) {
+      entitiesContainer.innerHTML = '<span class="font-code-sm text-code-sm text-secondary">No entities detected.</span>';
+      return;
+    }
+
+    const dotColor = sentiment === 'Positive' ? 'bg-primary-container'
+                   : sentiment === 'Negative' ? 'bg-error'
+                   : 'bg-surface-variant';
+
+    entitiesContainer.innerHTML = unique.map(word => `
+      <div class="flex items-center gap-2 bg-[#09090b] border border-outline-variant/20 px-3 py-1.5 rounded-full font-code-sm text-code-sm text-on-surface">
+        <div class="w-2 h-2 rounded-full ${dotColor}"></div>
+        ${word}
+      </div>
+    `).join('');
+  }
+
+  // ── helpers ───────────────────────────────────────────────────────────
+  function setLoading(on) {
+    analyzeBtn.classList.toggle('loading', on);
+    analyzeBtn.disabled = on;
+    analyzeBtn.style.opacity = on ? '0.7' : '1';
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.remove('hidden');
+  }
+
+  function hideError() {
+    errorMsg.classList.add('hidden');
+  }
+
+  function resetResults() {
+    dominantLabel.textContent = '—';
+    dominantLabel.className = 'font-h2 text-h2 text-primary-container';
+    confidenceScore.textContent = '—';
+    barPos.style.width = '0%';
+    barNeu.style.width = '0%';
+    barNeg.style.width = '0%';
+    lblPos.textContent = '— POS';
+    lblNeu.textContent = '— NEU';
+    lblNeg.textContent = '— NEG';
+    entitiesContainer.innerHTML = '<span class="font-code-sm text-code-sm text-secondary">Run analysis to see entities.</span>';
+  }
+</script>
+
+</body>
+</html>
