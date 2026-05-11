@@ -53,7 +53,6 @@ Sentiment_analsis/
 ├── train.ipynb              # Full training notebook
 └── static/
     ├── WebviewDesktop.html  # Dashboard UI (desktop)
-    └── WebviewMobile.html   # Dashboard UI (mobile)
 ```
 
 ---
@@ -110,9 +109,6 @@ Evaluated on **320,000 held-out tweets**.
 | **Accuracy** | | | **0.82** | 320,000 |
 
 Both models reach **82% accuracy** on 320k unseen tweets. LinearSVC was chosen for deployment due to faster inference at serving time.
-
-> The dataset contains no neutral class — all tweets are binary. Neutral output in the UI is reserved for future multi-class model versions.
-
 ---
 
 ## Getting Started
